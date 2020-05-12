@@ -161,6 +161,7 @@
 <p>如上所述，最终会调用Looper#pollOnce方法；</p>
 <p>可以看到最终调用了pollInner方法：</p>
 <p><a href="https://uploader.shimo.im/f/1xLj6Ps76RCjB8ja.png!thumbnail" target="_blank" rel="noopener" data-caption="图片" data-fancybox="images"><img src="https://uploader.shimo.im/f/1xLj6Ps76RCjB8ja.png!thumbnail" alt="图片"></a></p>
+<p>之后，调用epoll方法进行阻塞，在超时或者mWakeEventFd有事件的时候返回；</p>
 <p><a href="https://uploader.shimo.im/f/fbqKKS7K9QBfCi5R.png!thumbnail" target="_blank" rel="noopener" data-caption="图片" data-fancybox="images"><img src="https://uploader.shimo.im/f/fbqKKS7K9QBfCi5R.png!thumbnail" alt="图片"></a></p>
 <h1 id="4、nativeWake-方法">4、nativeWake()方法<a class="post-anchor" href="#4、nativeWake-方法"></a></h1><p>在消息入队的时候，如果当前消息队列阻塞，并且当前入队的是一个非异步的Message，会调用nativeWake方法唤醒消息队列对应的线程来处理消息。</p>
 <p>如下中可以看出，只要插入的Message不是异步的，那么needWake的值就会是mBlocked的值，而mBlocked的值会在出队方法next中、当线程阻塞的时候设为True。</p>
