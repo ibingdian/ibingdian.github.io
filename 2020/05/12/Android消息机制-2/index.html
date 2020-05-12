@@ -16,7 +16,7 @@
     <meta name="description" content="" />
     
     <title>
-      Hello World - 冰点
+      Android消息机制-2 - 冰点
     </title>
     <link rel="manifest" href="/manifest.json" />
     <link rel="shortcut icon" href="/images/favicon.jpg" type="image/x-icon" />
@@ -29,7 +29,7 @@
     
     <div id="post-toc" class="animated hiddenToc hide">
       <span class="title">Toc</span>
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Quick-Start"><span class="toc-text">Quick Start</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Create-a-new-post"><span class="toc-text">Create a new post</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Run-server"><span class="toc-text">Run server</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Generate-static-files"><span class="toc-text">Generate static files</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Deploy-to-remote-sites"><span class="toc-text">Deploy to remote sites</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1、概述"><span class="toc-text">1、概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2、nativeInit-方法"><span class="toc-text">2、nativeInit()方法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3、nativePollOnce-方法"><span class="toc-text">3、nativePollOnce()方法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4、nativeWake-方法"><span class="toc-text">4、nativeWake()方法</span></a></li></ol>
     </div>
     
     <div id="fixed-menu-wrap">
@@ -131,7 +131,7 @@
         <article class="post-entry">
     <div class="header">
       
-      <div class="title">Hello World</div>
+      <div class="title">Android消息机制-2</div>
       <div class="meta">
         <span class="item">
           <span class="iconfont icon-time-circle"></span>
@@ -147,34 +147,39 @@
       <div>
       </div>
     </div>
-    <html><head></head><body><p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start">Quick Start<a class="post-anchor" href="#Quick-Start"></a></h2><h3 id="Create-a-new-post">Create a new post<a class="post-anchor" href="#Create-a-new-post"></a></h3><figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></tbody></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server">Run server<a class="post-anchor" href="#Run-server"></a></h3><figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></tbody></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files">Generate static files<a class="post-anchor" href="#Generate-static-files"></a></h3><figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></tbody></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites">Deploy to remote sites<a class="post-anchor" href="#Deploy-to-remote-sites"></a></h3><figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></tbody></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-<p><a href="https://www.jianshu.com/p/390f202c5b0e" target="_blank" rel="noopener">https://www.jianshu.com/p/390f202c5b0e</a></p>
-<figure class="highlight plain"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br><span class="line"></span><br><span class="line">hexo deploy</span><br></pre></td></tr></tbody></table></figure>
-
-
-
+    <html><head></head><body><h1 id="1、概述">1、概述<a class="post-anchor" href="#1、概述"></a></h1><p>Handler发送的消息，会被添加到MessageQueue中，在添加新消息的时候，可能会唤醒MessageQueue；Handler所在线程的那个Looper会循环从MessageQueue取消息，如果没有可以返回的消息，可能会挂起等待一段时间。</p>
+<p>MessageQueue的挂起&唤醒，主要涉及到了一些native方法，如下</p>
+<h1 id="2、nativeInit-方法">2、nativeInit()方法<a class="post-anchor" href="#2、nativeInit-方法"></a></h1><p><a href="https://uploader.shimo.im/f/7mUZK6HvZQWe63vb.png!thumbnail" target="_blank" rel="noopener" data-caption="图片" data-fancybox="images"><img src="https://uploader.shimo.im/f/7mUZK6HvZQWe63vb.png!thumbnail" alt="图片"></a></p>
+<p>在创建MessageQueue时，会调用nativeInit()方法，会在native层创建一个NativeMessageQueue对象，并返回一个指向NativeMessageQueue的指针。</p>
+<p>在这个过程中，native层也创建了一个Looper对象。</p>
+<p><a href="https://uploader.shimo.im/f/GMZMEGz1WQm9nUUs.png!thumbnail" target="_blank" rel="noopener" data-caption="图片" data-fancybox="images"><img src="https://uploader.shimo.im/f/GMZMEGz1WQm9nUUs.png!thumbnail" alt="图片"></a></p>
+<p><a href="https://uploader.shimo.im/f/gh6zwYI2G0kjv5JT.png!thumbnail" target="_blank" rel="noopener" data-caption="图片" data-fancybox="images"><img src="https://uploader.shimo.im/f/gh6zwYI2G0kjv5JT.png!thumbnail" alt="图片"></a></p>
+<h1 id="3、nativePollOnce-方法">3、nativePollOnce()方法<a class="post-anchor" href="#3、nativePollOnce-方法"></a></h1><p>总之，底层是通过epoll实现的，会阻塞调用线程，在超时或者被唤醒的时候返回；</p>
+<p><a href="https://uploader.shimo.im/f/pDrISqF7ZGuR9iyO.png!thumbnail" target="_blank" rel="noopener" data-caption="图片" data-fancybox="images"><img src="https://uploader.shimo.im/f/pDrISqF7ZGuR9iyO.png!thumbnail" alt="图片"></a></p>
+<p><a href="https://uploader.shimo.im/f/aMQt97cFlswHi8GB.png!thumbnail" target="_blank" rel="noopener" data-caption="图片" data-fancybox="images"><img src="https://uploader.shimo.im/f/aMQt97cFlswHi8GB.png!thumbnail" alt="图片"></a></p>
+<p><a href="https://uploader.shimo.im/f/9OgG10BB1ajtWrzp.png!thumbnail" target="_blank" rel="noopener" data-caption="图片" data-fancybox="images"><img src="https://uploader.shimo.im/f/9OgG10BB1ajtWrzp.png!thumbnail" alt="图片"></a></p>
+<p>如上所述，最终会调用Looper#pollOnce方法；</p>
+<p>可以看到最终调用了pollInner方法：</p>
+<p><a href="https://uploader.shimo.im/f/1xLj6Ps76RCjB8ja.png!thumbnail" target="_blank" rel="noopener" data-caption="图片" data-fancybox="images"><img src="https://uploader.shimo.im/f/1xLj6Ps76RCjB8ja.png!thumbnail" alt="图片"></a></p>
+<p><a href="https://uploader.shimo.im/f/fbqKKS7K9QBfCi5R.png!thumbnail" target="_blank" rel="noopener" data-caption="图片" data-fancybox="images"><img src="https://uploader.shimo.im/f/fbqKKS7K9QBfCi5R.png!thumbnail" alt="图片"></a></p>
+<h1 id="4、nativeWake-方法">4、nativeWake()方法<a class="post-anchor" href="#4、nativeWake-方法"></a></h1><p>在消息入队的时候，如果当前消息队列阻塞，并且当前入队的是一个非异步的Message，会调用nativeWake方法唤醒消息队列对应的线程来处理消息。</p>
+<p>如下中可以看出，只要插入的Message不是异步的，那么needWake的值就会是mBlocked的值，而mBlocked的值会在出队方法next中、当线程阻塞的时候设为True。</p>
+<p><a href="https://uploader.shimo.im/f/KXlLH8s2rIYqpG9Y.png!thumbnail" target="_blank" rel="noopener" data-caption="图片" data-fancybox="images"><img src="https://uploader.shimo.im/f/KXlLH8s2rIYqpG9Y.png!thumbnail" alt="图片"></a></p>
+<p><a href="https://uploader.shimo.im/f/osWrRf9zKl2c6sZU.png!thumbnail" target="_blank" rel="noopener" data-caption="图片" data-fancybox="images"><img src="https://uploader.shimo.im/f/osWrRf9zKl2c6sZU.png!thumbnail" alt="图片"></a></p>
+<p><a href="https://uploader.shimo.im/f/FrpWPNBRn3emBDmn.png!thumbnail" target="_blank" rel="noopener" data-caption="图片" data-fancybox="images"><img src="https://uploader.shimo.im/f/FrpWPNBRn3emBDmn.png!thumbnail" alt="图片"></a></p>
+<p>从上面的nativeWake一路调用到MessageQueue中的wake然后到Looper中的wake。而在Looper中的wake，我们看到，使用write向mWakeEventFd中写入了一个uint64_t 的1。</p>
+<p>与我们前面分析pollInner中的对应。在pollInner中，若是由于对应的文件描述符发生的事件，调用awoke清空文件，而awoke刚好就是读取一个uint64_t的值。</p>
+<p>参考：<a href="https://blog.csdn.net/zip_tts/article/details/86097136" target="_blank" rel="noopener">Handler消息机制详解，另对于MessageQueue阻塞线程的详解</a></p>
 </body></html>
 
   
   <div class="post-guide">
     <div class="item left">
         
-          <a href="/2020/05/12/Android%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6-1/">Android消息机制-1</a>
-        
     </div>
     <div class="item right">
+        
+          <a href="/2020/05/12/Android%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6-1/">Android消息机制-1</a>
         
     </div>
   </div>
@@ -186,7 +191,7 @@
       本文作者：<a href="https://ibingdian.github.io">冰点</a>
     </div>
     <div class="link">
-      永久链接：<a href="https://ibingdian.github.io/2020/05/12/hello-world/">https://ibingdian.github.io/2020/05/12/hello-world/</a>
+      永久链接：<a href="https://ibingdian.github.io/2020/05/12/Android%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6-2/">https://ibingdian.github.io/2020/05/12/Android%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6-2/</a>
     </div>
     <div class="declare">
       版权声明：本文首发于<a href="https://ibingdian.github.io">冰点</a>的博客，转载请注明出处！
